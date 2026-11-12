@@ -1,0 +1,70 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "mongodb"
+  // url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  ADMIN
+  STAFF
+}
+
+model User {
+  id       String   @id @default(cuid()) @map("_id")
+  name     String
+  email    String   @unique
+  password String
+  role     UserRole @default(STAFF)
+
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  stockMovments StockMovment[]
+}
+
+model Product {
+  id          String   @id @default(cuid()) @map("_id")
+  name        String
+  Sku         String   @unique
+  price       Int
+  description String?
+  quantity    Int      @default(0)
+  categoryId  String
+  category    Category @relation(fields: [categoryId], references: [id])
+
+  createAt      DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  stockMovments StockMovment[]
+}
+
+model Category {
+  id          String  @id @default(cuid()) @map("_id")
+  name        String
+  description String?
+
+  createAt  DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  products Product[]
+}
+
+model StockMovment {
+  id        String  @id @default(cuid()) @map("_id")
+  ProductId String
+  userId    String
+  note      String?
+  quantity  Int
+
+  product Product @relation(fields: [ProductId], references: [id])
+  user    User    @relation(fields: [userId], references: [id])
+
+  createAt DateTime @default(now())
+}
