@@ -37,7 +37,6 @@ import {
   type SortingState,
 } from "@tanstack/react-table"
 import { Area, AreaChart, CartesianGrid, XAxis } from "recharts"
-import { toast } from "sonner"
 import { z } from "zod"
 
 import { useIsMobile } from "@/hooks/use-mobile"
@@ -93,10 +92,8 @@ import {
   TabsList,
   TabsTrigger,
 } from "@/components/ui/tabs"
-import { GripVerticalIcon, CircleCheckIcon, LoaderIcon, EllipsisVerticalIcon, Columns3Icon, ChevronDownIcon, PlusIcon, ChevronsLeftIcon, ChevronLeftIcon, ChevronRightIcon, ChevronsRightIcon, TrendingUpIcon } from "lucide-react"
+import { EllipsisVerticalIcon, Columns3Icon, ChevronDownIcon, PlusIcon, ChevronsLeftIcon, ChevronLeftIcon, ChevronRightIcon, ChevronsRightIcon, TrendingUpIcon } from "lucide-react"
 
-// New in v9: declare the features this table uses — anything you don't
-// register is tree-shaken out of the bundle.
 const features = tableFeatures({
   columnFilteringFeature,
   columnVisibilityFeature,
@@ -114,183 +111,108 @@ const columnHelper = createColumnHelper<
 >()
 
 export const schema = z.object({
-  id: z.number(),
-  header: z.string(),
-  type: z.string(),
-  status: z.string(),
-  target: z.string(),
-  limit: z.string(),
-  reviewer: z.string(),
+    id: z.string(),
+    name: z.string(),
+    Sku: z.string(),
+    price: z.number(),
+    description: z.string(),
+    quantity: z.number(),
+    categoryId: z.string(),
+    createdAt: z.date(),
+    updatedAt: z.date(),
+
+
 })
 
-// Create a separate component for the drag handle
-function DragHandle({ id }: { id: number }) {
-  const { attributes, listeners } = useSortable({
-    id,
-  })
-  return (
-    <Button
-      {...attributes}
-      {...listeners}
-      variant="ghost"
-      size="icon"
-      className="size-7 text-muted-foreground hover:bg-transparent"
-    >
-      <GripVerticalIcon className="size-3 text-muted-foreground" />
-      <span className="sr-only">Drag to reorder</span>
-    </Button>
-  )
-}
 const columns = columnHelper.columns([
-  columnHelper.display({
-    id: "drag",
-    header: () => null,
-    cell: ({ row }) => <DragHandle id={row.original.id} />,
-  }),
-  columnHelper.display({
-    id: "select",
-    header: ({ table }) => (
-      <div className="flex items-center justify-center">
-        <Checkbox
-          checked={table.getIsAllPageRowsSelected()}
-          indeterminate={
-            table.getIsSomePageRowsSelected() &&
-            !table.getIsAllPageRowsSelected()
-          }
-          onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-          aria-label="Select all"
-        />
-      </div>
-    ),
-    cell: ({ row }) => (
-      <div className="flex items-center justify-center">
-        <Checkbox
-          checked={row.getIsSelected()}
-          onCheckedChange={(value) => row.toggleSelected(!!value)}
-          aria-label="Select row"
-        />
-      </div>
-    ),
-    enableSorting: false,
-    enableHiding: false,
-  }),
-  columnHelper.accessor("header", {
-    header: "Header",
+
+  // columnHelper.display({
+  //   id: "select",
+  //   header: ({ table }) => (
+  //     <div className="flex items-center justify-center">
+  //       <Checkbox
+  //         checked={table.getIsAllPageRowsSelected()}
+  //         indeterminate={
+  //           table.getIsSomePageRowsSelected() &&
+  //           !table.getIsAllPageRowsSelected()
+  //         }
+  //         onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
+  //         aria-label="Select all"
+  //       />
+  //     </div>
+  //   ),
+  //   enableSorting: false,
+  //   enableHiding: false,
+  // }),
+  columnHelper.accessor("id", {
+    header: "ID",
     cell: ({ row }) => {
       return <TableCellViewer item={row.original} />
     },
     enableHiding: false,
   }),
-  columnHelper.accessor("type", {
-    header: "Section Type",
+  columnHelper.accessor("name", {
+    header: "Name",
     cell: ({ row }) => (
       <div className="w-32">
-        <Badge variant="outline" className="px-1.5 text-muted-foreground">
-          {row.original.type}
-        </Badge>
+    
+        <h1 className="px-1.5 text-muted-foreground">name</h1>
       </div>
     ),
   }),
-  columnHelper.accessor("status", {
-    header: "Status",
+  columnHelper.accessor("Sku", {
+    header: "Sku",
     cell: ({ row }) => (
       <Badge variant="outline" className="px-1.5 text-muted-foreground">
-        {row.original.status === "Done" ? (
-          <CircleCheckIcon className="fill-green-500 dark:fill-green-400" />
-        ) : (
-          <LoaderIcon
-          />
-        )}
-        {row.original.status}
+        sku
       </Badge>
     ),
   }),
-  columnHelper.accessor("target", {
-    header: () => <div className="w-full text-right">Target</div>,
+   columnHelper.accessor("price", {
+    header: "Price",
     cell: ({ row }) => (
-      <form
-        onSubmit={(e) => {
-          e.preventDefault()
-          toast.promise(new Promise((resolve) => setTimeout(resolve, 1000)), {
-            loading: `Saving ${row.original.header}`,
-            success: "Done",
-            error: "Error",
-          })
-        }}
-      >
-        <Label htmlFor={`${row.original.id}-target`} className="sr-only">
-          Target
-        </Label>
-        <Input
-          className="h-8 w-16 border-transparent bg-transparent text-right shadow-none hover:bg-input/30 focus-visible:border focus-visible:bg-background dark:bg-transparent dark:hover:bg-input/30 dark:focus-visible:bg-input/30"
-          defaultValue={row.original.target}
-          id={`${row.original.id}-target`}
-        />
-      </form>
+      <Badge variant="outline" className="px-1.5 text-muted-foreground">
+        price Br
+      </Badge>
     ),
   }),
-  columnHelper.accessor("limit", {
-    header: () => <div className="w-full text-right">Limit</div>,
+   columnHelper.accessor("description", {
+    header: "Description",
     cell: ({ row }) => (
-      <form
-        onSubmit={(e) => {
-          e.preventDefault()
-          toast.promise(new Promise((resolve) => setTimeout(resolve, 1000)), {
-            loading: `Saving ${row.original.header}`,
-            success: "Done",
-            error: "Error",
-          })
-        }}
-      >
-        <Label htmlFor={`${row.original.id}-limit`} className="sr-only">
-          Limit
-        </Label>
-        <Input
-          className="h-8 w-16 border-transparent bg-transparent text-right shadow-none hover:bg-input/30 focus-visible:border focus-visible:bg-background dark:bg-transparent dark:hover:bg-input/30 dark:focus-visible:bg-input/30"
-          defaultValue={row.original.limit}
-          id={`${row.original.id}-limit`}
-        />
-      </form>
+     
+       <p className="px-1.5 text-muted-foreground">description</p>
     ),
   }),
-  columnHelper.accessor("reviewer", {
-    header: "Reviewer",
-    cell: ({ row }) => {
-      const isAssigned = row.original.reviewer !== "Assign reviewer"
-      if (isAssigned) {
-        return row.original.reviewer
-      }
-      return (
-        <>
-          <Label htmlFor={`${row.original.id}-reviewer`} className="sr-only">
-            Reviewer
-          </Label>
-          <Select
-            items={[
-              { label: "Eddie Lake", value: "Eddie Lake" },
-              { label: "Jamik Tashpulatov", value: "Jamik Tashpulatov" },
-            ]}
-          >
-            <SelectTrigger
-              className="w-38 **:data-[slot=select-value]:block **:data-[slot=select-value]:truncate"
-              size="sm"
-              id={`${row.original.id}-reviewer`}
-            >
-              <SelectValue placeholder="Assign reviewer" />
-            </SelectTrigger>
-            <SelectContent align="end">
-              <SelectGroup>
-                <SelectItem value="Eddie Lake">Eddie Lake</SelectItem>
-                <SelectItem value="Jamik Tashpulatov">
-                  Jamik Tashpulatov
-                </SelectItem>
-              </SelectGroup>
-            </SelectContent>
-          </Select>
-        </>
-      )
-    },
+   columnHelper.accessor("quantity", {
+    header: "Quantity",
+    cell: ({ row }) => (
+      <Badge variant="outline" className="px-1.5 text-muted-foreground">
+        100
+      </Badge>
+    ),
   }),
+   columnHelper.accessor("categoryId", {
+    header: "Category",
+    cell: ({ row }) => (
+      <Badge variant="outline" className="px-1.5 text-muted-foreground">
+        Category
+      </Badge>
+    ),
+  }),
+   columnHelper.accessor("createdAt", {
+    header: "Created At",
+    cell: ({ row }) => (
+      <p className="px-1.5 text-muted-foreground">Created At</p>
+    ),
+  }),
+   columnHelper.accessor("updatedAt", {
+    header: "Updated At",
+    cell: ({ row }) => (
+     <p className="px-1.5 text-muted-foreground">updated At </p>
+    ),
+  }),
+
+  
   columnHelper.display({
     id: "actions",
     cell: () => (
@@ -404,7 +326,7 @@ export function DataTable({
   }
   return (
     <Tabs
-      defaultValue="outline"
+      defaultValue="products"
       className="w-full flex-col justify-start gap-6"
     >
       <div className="flex items-center justify-between px-4 lg:px-6">
@@ -412,9 +334,9 @@ export function DataTable({
           View
         </Label>
         <Select
-          defaultValue="outline"
+          defaultValue="products"
           items={[
-            { label: "Outline", value: "outline" },
+            { label: "Product", value: "products" },
             { label: "Past Performance", value: "past-performance" },
             { label: "Key Personnel", value: "key-personnel" },
             { label: "Focus Documents", value: "focus-documents" },
@@ -429,7 +351,7 @@ export function DataTable({
           </SelectTrigger>
           <SelectContent>
             <SelectGroup>
-              <SelectItem value="outline">Outline</SelectItem>
+              <SelectItem value="products">Products</SelectItem>
               <SelectItem value="past-performance">Past Performance</SelectItem>
               <SelectItem value="key-personnel">Key Personnel</SelectItem>
               <SelectItem value="focus-documents">Focus Documents</SelectItem>
@@ -437,7 +359,7 @@ export function DataTable({
           </SelectContent>
         </Select>
         <TabsList className="hidden **:data-[slot=badge]:size-5 **:data-[slot=badge]:rounded-full **:data-[slot=badge]:bg-muted-foreground/30 **:data-[slot=badge]:px-1 @4xl/main:flex">
-          <TabsTrigger value="outline">Outline</TabsTrigger>
+          <TabsTrigger value="products">Products</TabsTrigger>
           <TabsTrigger value="past-performance">
             Past Performance <Badge variant="secondary">3</Badge>
           </TabsTrigger>
@@ -479,15 +401,11 @@ export function DataTable({
                 })}
             </DropdownMenuContent>
           </DropdownMenu>
-          <Button variant="outline" size="sm">
-            <PlusIcon
-            />
-            <span className="hidden lg:inline">Add Section</span>
-          </Button>
+          
         </div>
       </div>
       <TabsContent
-        value="outline"
+        value="products"
         className="relative flex flex-col gap-4 overflow-auto px-4 lg:px-6"
       >
         <div className="overflow-hidden rounded-lg border">
@@ -836,10 +754,6 @@ function TableCellViewer({ item }: { item: z.infer<typeof schema> }) {
               </div>
             </div>
             <div className="grid grid-cols-2 gap-4">
-              <div className="flex flex-col gap-3">
-                <Label htmlFor="target">Target</Label>
-                <Input id="target" defaultValue={item.target} />
-              </div>
               <div className="flex flex-col gap-3">
                 <Label htmlFor="limit">Limit</Label>
                 <Input id="limit" defaultValue={item.limit} />

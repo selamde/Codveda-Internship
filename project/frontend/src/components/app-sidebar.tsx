@@ -13,7 +13,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
-import { LayoutDashboardIcon, ListIcon, ChartBarIcon, FolderIcon, UsersIcon, CameraIcon, FileTextIcon, Settings2Icon, CircleHelpIcon, SearchIcon, DatabaseIcon, FileChartColumnIcon, FileIcon, CommandIcon } from "lucide-react"
+import { LayoutDashboardIcon, ChartBarIcon, CameraIcon, FileTextIcon, Settings2Icon, CircleHelpIcon, SearchIcon, FileChartColumnIcon, CommandIcon, PackagePen, ShieldUser, UserGroup, Layers } from "lucide-react"
 
 const data = {
   user: {
@@ -24,44 +24,37 @@ const data = {
   navMain: [
     {
       title: "Dashboard",
-      url: "#",
+      url: "/dashboard",
       icon: (
         <LayoutDashboardIcon
         />
       ),
     },
     {
-      title: "Lifecycle",
-      url: "#",
+      title: "Add Products",
+      url: "/dashboard/products",
       icon: (
-        <ListIcon
+        <PackagePen
         />
       ),
     },
     {
-      title: "Analytics",
-      url: "#",
+      title: "Add Category",
+      url: "/dashboard/categories",
       icon: (
         <ChartBarIcon
         />
       ),
     },
-    {
-      title: "Projects",
-      url: "#",
+     {
+      title: "Stock Movements",
+      url: "/dashboard/stock-movements",
       icon: (
-        <FolderIcon
+        <Layers
         />
       ),
     },
-    {
-      title: "Team",
-      url: "#",
-      icon: (
-        <UsersIcon
-        />
-      ),
-    },
+   
   ],
   navClouds: [
     {
@@ -147,11 +140,20 @@ const data = {
     },
   ],
   documents: [
-    {
-      name: "Data Library",
+ 
+     {
+      name: "Add Staff",
       url: "#",
       icon: (
-        <DatabaseIcon
+        <UserGroup
+        />
+      ),
+    },
+    {
+      name: "Add Admin",
+      url: "#",
+      icon: (
+        <ShieldUser
         />
       ),
     },
@@ -163,14 +165,7 @@ const data = {
         />
       ),
     },
-    {
-      name: "Word Assistant",
-      url: "#",
-      icon: (
-        <FileIcon
-        />
-      ),
-    },
+    
   ],
 }
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {

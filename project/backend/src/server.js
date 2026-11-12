@@ -1,12 +1,32 @@
 import express from "express"
 import { connectDb } from "./config/db.js";
-
+import stockMovmentRoutes from "./routes/stockmovements.routes.js"
+import productsRoutes from "./routes/products.routes.js"
+import categoriesRoutes from "./routes/categorys.routes.js"
+import cors from "cors"
 
 const app = express();
 
 app.use(express.json());
 
+app.use(cors({
+   origin: "http://localhost:5173" 
+}))
+
+app.use((req, res, next) =>{
+    console.log(`Reg method ${req.method} url ${req.url}`)
+    next()
+
+})
+
+
+
 const port = process.env.PORT || 5000
+
+// 4. Register routes
+app.use("/api/products", productsRoutes )
+app.use("/api/stock-movements", stockMovmentRoutes)
+app.use("/api/categories", categoriesRoutes)
 
 
 // POST	/api/auth/register	Register user
@@ -14,46 +34,9 @@ const port = process.env.PORT || 5000
 // GET	/api/auth/me	Current user
 
 
-// GET	/api/products	List products
-app.get("/api/products", (req, res)=>{
-    const {} = req.body
-    res.status(200).json("Getting all products")
-})
 
-// POST	/api/products	Create product
-app.post("/api/products", (req, res)=>{
-    res.status(200).json("Getting all prosucts")
-})
 
-// PATCH	/api/products/:id	Update product
-app.patch("/api/products/:id", (req, res)=>{
-    res.status(200).json("Getting all prosucts")
-})
 
-// DELETE	/api/products/:id	Delete product
-app.delete("/api/products/:id", (req, res)=>{
-    res.status(200).json("Getting all prosucts")
-})
-
-// GET	/api/categories	List categories
-app.get("/api/categories", (req, res)=>{
-    res.status(200).json("Getting all prosucts")
-})
-
-// POST	/api/categories	Create category
-app.post("/api/categories", (req, res)=>{
-    res.status(200).json("Getting all prosucts")
-})
-
-// GET	/api/stock-movements	Movement history
-app.get("/api/stock-movements", (req, res)=>{
-    res.status(200).json("Getting all prosucts")
-})
-
-// POST	/api/stock-movements	Add stock movement
-app.post("/api/stock-movements", (req, res)=>{
-    res.status(200).json("Getting all prosucts")
-})
 
 
 // GET	/api/dashboard/stats

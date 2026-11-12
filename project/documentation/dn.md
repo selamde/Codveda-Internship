@@ -29,3 +29,25 @@ dotenv.config();
 
 // Fix MongoDB SRV DNS resolution
 dns.setServers(["8.8.8.8", "8.8.4.4"]);
+
+@@index():
+In a Prisma schema, @@index() is a block-level attribute that defines a database index on one or more fields of a model.
+An index creates a sorted data structure (such as a B-tree) in your underlying database, allowing queries to locate matching records quickly without scanning every row in a table. Unlike @unique or @@unique, @@index() speeds up read queries without enforcing uniqueness on the values.
+
+to communicate with the database use prisma client:
+import { PrismaClient } from "@prisma/client";
+
+const prisma = new PrismaClient();
+
+export default prisma;
+
+the server was crushing so i changed the provider:
+generator client {
+provider = "prisma-client-js"
+output = "../generated/prisma"
+}
+
+datasource db {
+provider = "mongodb"
+// url = env("DATABASE_URL")
+}
