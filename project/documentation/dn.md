@@ -51,3 +51,17 @@ datasource db {
 provider = "mongodb"
 // url = env("DATABASE_URL")
 }
+
+@db.ObjectId is a Prisma field attribute that tells Prisma to store a field as a MongoDB ObjectId instead of a regular string.
+
+Let's break it down.
+
+1. What is ObjectId in MongoDB?
+   MongoDB uses a special data type called ObjectId to uniquely identify documents.
+
+For example, a MongoDB document:
+{
+"\_id": ObjectId("673abc123456789012345678"),
+"name": "Laptop",
+"price": 25000
+}

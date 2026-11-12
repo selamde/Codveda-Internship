@@ -36,19 +36,20 @@ import {
   type Row,
   type SortingState,
 } from "@tanstack/react-table"
-import { Area, AreaChart, CartesianGrid, XAxis } from "recharts"
+
+
+// export function TextareaDemo() {
+//   return <Textarea placeholder="Type your message here." />
+// }
+
 import { z } from "zod"
 
 import { useIsMobile } from "@/hooks/use-mobile"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
-  ChartContainer,
-  ChartTooltip,
-  ChartTooltipContent,
   type ChartConfig,
 } from "@/components/ui/chart"
-import { Checkbox } from "@/components/ui/checkbox"
 import {
   Drawer,
   DrawerClose,
@@ -92,7 +93,8 @@ import {
   TabsList,
   TabsTrigger,
 } from "@/components/ui/tabs"
-import { EllipsisVerticalIcon, Columns3Icon, ChevronDownIcon, PlusIcon, ChevronsLeftIcon, ChevronLeftIcon, ChevronRightIcon, ChevronsRightIcon, TrendingUpIcon } from "lucide-react"
+import { EllipsisVerticalIcon, Columns3Icon, ChevronDownIcon, ChevronsLeftIcon, ChevronLeftIcon, ChevronRightIcon, ChevronsRightIcon, TrendingUpIcon } from "lucide-react"
+import { useCategories } from "@/hooks/use-categories"
 
 const features = tableFeatures({
   columnFilteringFeature,
@@ -118,8 +120,8 @@ export const schema = z.object({
     description: z.string(),
     quantity: z.number(),
     categoryId: z.string(),
-    createdAt: z.date(),
-    updatedAt: z.date(),
+    createAt: z.string(),
+    updatedAt: z.string(),
 
 
 })
@@ -146,6 +148,11 @@ const columns = columnHelper.columns([
   // }),
   columnHelper.accessor("id", {
     header: "ID",
+    // cell: ({ row }) => {
+    //   // console.log("ROW:", row.original);
+    //   // return( <p className="px-1.5 text-muted-foreground">{row.original.id}</p>)
+      
+    // },
     cell: ({ row }) => {
       return <TableCellViewer item={row.original} />
     },
@@ -154,17 +161,14 @@ const columns = columnHelper.columns([
   columnHelper.accessor("name", {
     header: "Name",
     cell: ({ row }) => (
-      <div className="w-32">
-    
-        <h1 className="px-1.5 text-muted-foreground">name</h1>
-      </div>
+       <p className="px-1.5 text-muted-foreground">{row.original.name}</p>
     ),
   }),
   columnHelper.accessor("Sku", {
     header: "Sku",
     cell: ({ row }) => (
       <Badge variant="outline" className="px-1.5 text-muted-foreground">
-        sku
+        {row.original.Sku}
       </Badge>
     ),
   }),
@@ -172,7 +176,7 @@ const columns = columnHelper.columns([
     header: "Price",
     cell: ({ row }) => (
       <Badge variant="outline" className="px-1.5 text-muted-foreground">
-        price Br
+        {row.original.price} Br
       </Badge>
     ),
   }),
@@ -180,14 +184,14 @@ const columns = columnHelper.columns([
     header: "Description",
     cell: ({ row }) => (
      
-       <p className="px-1.5 text-muted-foreground">description</p>
+       <p className="px-1.5 text-muted-foreground">{row.original.description}</p>
     ),
   }),
    columnHelper.accessor("quantity", {
     header: "Quantity",
     cell: ({ row }) => (
       <Badge variant="outline" className="px-1.5 text-muted-foreground">
-        100
+       {row.original.quantity}
       </Badge>
     ),
   }),
@@ -195,20 +199,20 @@ const columns = columnHelper.columns([
     header: "Category",
     cell: ({ row }) => (
       <Badge variant="outline" className="px-1.5 text-muted-foreground">
-        Category
+       {row.original.categoryId}
       </Badge>
     ),
   }),
-   columnHelper.accessor("createdAt", {
+   columnHelper.accessor("createAt", {
     header: "Created At",
     cell: ({ row }) => (
-      <p className="px-1.5 text-muted-foreground">Created At</p>
+      <p className="px-1.5 text-muted-foreground">{row.original.createAt}</p>
     ),
   }),
    columnHelper.accessor("updatedAt", {
     header: "Updated At",
     cell: ({ row }) => (
-     <p className="px-1.5 text-muted-foreground">updated At </p>
+     <p className="px-1.5 text-muted-foreground">{row.original.updatedAt} </p>
     ),
   }),
 
@@ -604,6 +608,11 @@ const chartConfig = {
 } satisfies ChartConfig
 function TableCellViewer({ item }: { item: z.infer<typeof schema> }) {
   const isMobile = useIsMobile()
+  const {
+    data: categories=[],
+    isLoading,
+    error
+  } = useCategories();
   return (
     <Drawer swipeDirection={isMobile ? "down" : "right"}>
       <DrawerTrigger
@@ -614,68 +623,24 @@ function TableCellViewer({ item }: { item: z.infer<typeof schema> }) {
           />
         }
       >
-        {item.header}
+        {item.id}
       </DrawerTrigger>
       <DrawerContent>
         <DrawerHeader className="gap-1">
-          <DrawerTitle>{item.header}</DrawerTitle>
-          <DrawerDescription>
-            Showing total visitors for the last 6 months
-          </DrawerDescription>
+          <DrawerTitle>Product ID: <span className="text-destructive">{item.id}</span> </DrawerTitle>
+          
         </DrawerHeader>
         <div className="flex flex-col gap-4 overflow-y-auto px-4 text-sm">
           {!isMobile && (
             <>
-              <ChartContainer config={chartConfig}>
-                <AreaChart
-                  accessibilityLayer
-                  data={chartData}
-                  margin={{
-                    left: 0,
-                    right: 10,
-                  }}
-                >
-                  <CartesianGrid vertical={false} />
-                  <XAxis
-                    dataKey="month"
-                    tickLine={false}
-                    axisLine={false}
-                    tickMargin={8}
-                    tickFormatter={(value) => value.slice(0, 3)}
-                    hide
-                  />
-                  <ChartTooltip
-                    cursor={false}
-                    content={<ChartTooltipContent indicator="dot" />}
-                  />
-                  <Area
-                    dataKey="mobile"
-                    type="natural"
-                    fill="var(--color-mobile)"
-                    fillOpacity={0.6}
-                    stroke="var(--color-mobile)"
-                    stackId="a"
-                  />
-                  <Area
-                    dataKey="desktop"
-                    type="natural"
-                    fill="var(--color-desktop)"
-                    fillOpacity={0.4}
-                    stroke="var(--color-desktop)"
-                    stackId="a"
-                  />
-                </AreaChart>
-              </ChartContainer>
+
               <Separator />
               <div className="grid gap-2">
                 <div className="flex gap-2 leading-none font-medium">
-                  Trending up by 5.2% this month{" "}
-                  <TrendingUpIcon className="size-4" />
+                  Product Description
                 </div>
                 <div className="text-muted-foreground">
-                  Showing total visitors for the last 6 months. This is just
-                  some random text to test the layout. It spans multiple lines
-                  and should wrap around.
+                  {item.description}
                 </div>
               </div>
               <Separator />
@@ -683,102 +648,54 @@ function TableCellViewer({ item }: { item: z.infer<typeof schema> }) {
           )}
           <form className="flex flex-col gap-4">
             <div className="flex flex-col gap-3">
-              <Label htmlFor="header">Header</Label>
-              <Input id="header" defaultValue={item.header} />
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="flex flex-col gap-3">
-                <Label htmlFor="type">Type</Label>
-                <Select
-                  defaultValue={item.type}
-                  items={[
-                    { label: "Table of Contents", value: "Table of Contents" },
-                    { label: "Executive Summary", value: "Executive Summary" },
-                    {
-                      label: "Technical Approach",
-                      value: "Technical Approach",
-                    },
-                    { label: "Design", value: "Design" },
-                    { label: "Capabilities", value: "Capabilities" },
-                    { label: "Focus Documents", value: "Focus Documents" },
-                    { label: "Narrative", value: "Narrative" },
-                    { label: "Cover Page", value: "Cover Page" },
-                  ]}
-                >
-                  <SelectTrigger id="type" className="w-full">
-                    <SelectValue placeholder="Select a type" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectGroup>
-                      <SelectItem value="Table of Contents">
-                        Table of Contents
-                      </SelectItem>
-                      <SelectItem value="Executive Summary">
-                        Executive Summary
-                      </SelectItem>
-                      <SelectItem value="Technical Approach">
-                        Technical Approach
-                      </SelectItem>
-                      <SelectItem value="Design">Design</SelectItem>
-                      <SelectItem value="Capabilities">Capabilities</SelectItem>
-                      <SelectItem value="Focus Documents">
-                        Focus Documents
-                      </SelectItem>
-                      <SelectItem value="Narrative">Narrative</SelectItem>
-                      <SelectItem value="Cover Page">Cover Page</SelectItem>
-                    </SelectGroup>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="flex flex-col gap-3">
-                <Label htmlFor="status">Status</Label>
-                <Select
-                  defaultValue={item.status}
-                  items={[
-                    { label: "Done", value: "Done" },
-                    { label: "In Progress", value: "In Progress" },
-                    { label: "Not Started", value: "Not Started" },
-                  ]}
-                >
-                  <SelectTrigger id="status" className="w-full">
-                    <SelectValue placeholder="Select a status" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectGroup>
-                      <SelectItem value="Done">Done</SelectItem>
-                      <SelectItem value="In Progress">In Progress</SelectItem>
-                      <SelectItem value="Not Started">Not Started</SelectItem>
-                    </SelectGroup>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="flex flex-col gap-3">
-                <Label htmlFor="limit">Limit</Label>
-                <Input id="limit" defaultValue={item.limit} />
-              </div>
+              <Label htmlFor="name">Name</Label>
+              <Input id="name" defaultValue={item.name} />
             </div>
             <div className="flex flex-col gap-3">
-              <Label htmlFor="reviewer">Reviewer</Label>
+              <Label htmlFor="sku">Sku</Label>
+              <Input id="sku" defaultValue={item.Sku} />
+            </div>
+             <div className="flex flex-col gap-3">
+              <Label htmlFor="price">Price</Label>
+              <Input id="price" defaultValue={item.price} />
+            </div>
+            <div className="flex flex-col gap-3">
+              <Label htmlFor="description">Description</Label>
+          
+              <Input id="description" defaultValue={item.description} />
+             
+            </div>
+            <div className="flex flex-col gap-3">
+              <Label htmlFor="quantity">Quantity</Label>
+              <Input id="quantity" defaultValue={item.quantity} />
+            </div>
+           
+  
+    
+            
+           
+            <div className="flex flex-col gap-3 mb-8">
+              <Label htmlFor="reviewer">Category</Label>
+             
               <Select
-                defaultValue={item.reviewer}
-                items={[
-                  { label: "Eddie Lake", value: "Eddie Lake" },
-                  { label: "Jamik Tashpulatov", value: "Jamik Tashpulatov" },
-                  { label: "Emily Whalen", value: "Emily Whalen" },
-                ]}
+                defaultValue={item.categoryId}
+                items={categories.map((category)=>({
+                  label: category.name,
+               value:category.name
+                }))}
               >
                 <SelectTrigger id="reviewer" className="w-full">
-                  <SelectValue placeholder="Select a reviewer" />
+                  <SelectValue placeholder={
+                    isLoading? "Loading Categories...": "Select Category"
+                  } />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectGroup>
-                    <SelectItem value="Eddie Lake">Eddie Lake</SelectItem>
-                    <SelectItem value="Jamik Tashpulatov">
-                      Jamik Tashpulatov
-                    </SelectItem>
-                    <SelectItem value="Emily Whalen">Emily Whalen</SelectItem>
+                    {categories.map((category) => (
+          <SelectItem key={category.name} value={category.name}>
+            {category.name}
+          </SelectItem>
+        ))}
                   </SelectGroup>
                 </SelectContent>
               </Select>
@@ -786,8 +703,8 @@ function TableCellViewer({ item }: { item: z.infer<typeof schema> }) {
           </form>
         </div>
         <DrawerFooter>
-          <Button>Submit</Button>
-          <DrawerClose render={<Button variant="outline" />}>Done</DrawerClose>
+          <Button>Update</Button>
+          <DrawerClose render={<Button variant="outline" />}>Cancel</DrawerClose>
         </DrawerFooter>
       </DrawerContent>
     </Drawer>
