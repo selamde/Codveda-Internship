@@ -38,9 +38,6 @@ import {
 } from "@tanstack/react-table"
 
 
-// export function TextareaDemo() {
-//   return <Textarea placeholder="Type your message here." />
-// }
 
 import { z } from "zod"
 
@@ -54,7 +51,6 @@ import {
   Drawer,
   DrawerClose,
   DrawerContent,
-  DrawerDescription,
   DrawerFooter,
   DrawerHeader,
   DrawerTitle,
@@ -93,8 +89,14 @@ import {
   TabsList,
   TabsTrigger,
 } from "@/components/ui/tabs"
-import { EllipsisVerticalIcon, Columns3Icon, ChevronDownIcon, ChevronsLeftIcon, ChevronLeftIcon, ChevronRightIcon, ChevronsRightIcon, TrendingUpIcon } from "lucide-react"
+import { EllipsisVerticalIcon, Columns3Icon, ChevronDownIcon, ChevronsLeftIcon, ChevronLeftIcon, ChevronRightIcon, ChevronsRightIcon } from "lucide-react"
 import { useCategories } from "@/hooks/use-categories"
+import { useMutation, useQueryClient } from "@tanstack/react-query"
+import { deleteProduct } from "@/services/product-api"
+import { toast } from "sonner"
+
+
+
 
 const features = tableFeatures({
   columnFilteringFeature,
@@ -126,33 +128,44 @@ export const schema = z.object({
 
 })
 
-const columns = columnHelper.columns([
 
-  // columnHelper.display({
-  //   id: "select",
-  //   header: ({ table }) => (
-  //     <div className="flex items-center justify-center">
-  //       <Checkbox
-  //         checked={table.getIsAllPageRowsSelected()}
-  //         indeterminate={
-  //           table.getIsSomePageRowsSelected() &&
-  //           !table.getIsAllPageRowsSelected()
-  //         }
-  //         onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-  //         aria-label="Select all"
-  //       />
-  //     </div>
-  //   ),
-  //   enableSorting: false,
-  //   enableHiding: false,
-  // }),
+function DraggableRow({
+  row,
+}: {
+  row: Row<typeof features, z.infer<typeof schema>>
+}) {
+  const { transform, transition, setNodeRef, isDragging } = useSortable({
+    id: row.original.id,
+  })
+  return (
+    <TableRow
+      data-state={row.getIsSelected() && "selected"}
+      data-dragging={isDragging}
+      ref={setNodeRef}
+      className="relative z-0 data-[dragging=true]:z-10 data-[dragging=true]:opacity-80"
+      style={{
+        transform: CSS.Transform.toString(transform),
+        transition: transition,
+      }}
+    >
+      {row.getVisibleCells().map((cell) => (
+        <TableCell key={cell.id}>
+          <FlexRender cell={cell} />
+        </TableCell>
+      ))}
+    </TableRow>
+  )
+}
+export function DataTable({
+  data: initialData,
+}: {
+  data: z.infer<typeof schema>[]
+}) {
+  
+  const columns = columnHelper.columns([
+
   columnHelper.accessor("id", {
     header: "ID",
-    // cell: ({ row }) => {
-    //   // console.log("ROW:", row.original);
-    //   // return( <p className="px-1.5 text-muted-foreground">{row.original.id}</p>)
-      
-    // },
     cell: ({ row }) => {
       return <TableCellViewer item={row.original} />
     },
@@ -219,7 +232,7 @@ const columns = columnHelper.columns([
   
   columnHelper.display({
     id: "actions",
-    cell: () => (
+    cell: ({row}) => (
       <DropdownMenu>
         <DropdownMenuTrigger
           render={
@@ -236,48 +249,20 @@ const columns = columnHelper.columns([
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-32">
           <DropdownMenuItem>Edit</DropdownMenuItem>
-          <DropdownMenuItem>Make a copy</DropdownMenuItem>
           <DropdownMenuItem>Favorite</DropdownMenuItem>
           <DropdownMenuSeparator />
-          <DropdownMenuItem variant="destructive">Delete</DropdownMenuItem>
+          <DropdownMenuItem variant="destructive" onClick={() => handleDelete(row.original.id) }>Delete</DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
     ),
   }),
 ])
-function DraggableRow({
-  row,
-}: {
-  row: Row<typeof features, z.infer<typeof schema>>
-}) {
-  const { transform, transition, setNodeRef, isDragging } = useSortable({
-    id: row.original.id,
-  })
-  return (
-    <TableRow
-      data-state={row.getIsSelected() && "selected"}
-      data-dragging={isDragging}
-      ref={setNodeRef}
-      className="relative z-0 data-[dragging=true]:z-10 data-[dragging=true]:opacity-80"
-      style={{
-        transform: CSS.Transform.toString(transform),
-        transition: transition,
-      }}
-    >
-      {row.getVisibleCells().map((cell) => (
-        <TableCell key={cell.id}>
-          <FlexRender cell={cell} />
-        </TableCell>
-      ))}
-    </TableRow>
-  )
-}
-export function DataTable({
-  data: initialData,
-}: {
-  data: z.infer<typeof schema>[]
-}) {
+
+  const queryClient = useQueryClient();
   const [data, setData] = React.useState(() => initialData)
+  React.useEffect(() => {
+  setData(initialData)
+}, [initialData])
   const [rowSelection, setRowSelection] = React.useState({})
   const [columnVisibility, setColumnVisibility] =
     React.useState<ColumnVisibilityState>({})
@@ -299,6 +284,7 @@ export function DataTable({
     () => data?.map(({ id }) => id) || [],
     [data]
   )
+
   const table = useTable({
     features,
     data,
@@ -328,6 +314,34 @@ export function DataTable({
       })
     }
   }
+
+const deleteMutation = useMutation({
+  mutationFn: deleteProduct,
+
+  onSuccess: async ()=>{
+    await queryClient.invalidateQueries({
+      queryKey: ["products"]
+    })
+
+    toast.success("Success", {description: "Product deleted sucessfully!"})
+
+  },
+  onError: (error)=>{
+    console.log("Error", error.message)
+
+    toast.error("Error", {description: "Failed to delete the product!"})
+
+  }
+
+
+
+
+})
+
+const handleDelete = (id: string)=>{
+deleteMutation.mutate(id)
+}
+
   return (
     <Tabs
       defaultValue="products"

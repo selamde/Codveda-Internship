@@ -4,5 +4,5 @@ export interface Product{
     price:number
     description: string ,
     quantity: number, 
-    categorId: string
+    categoryId: string
 }

@@ -16,7 +16,11 @@ try{
    if(!result){
     return res.status(400).json({message: "Error while creating the product!"})
    }
-   res.status(201).json(result)
+   res.status(201).json({
+    ok:true,
+    sucess:true,
+    product:result
+   })
 
 
 }catch(error){
@@ -120,7 +124,10 @@ try{
         return res.status(400).json({message: "Failed to delete the product!"})
     }
 
-    res.status(200).json({message: "Product deleted successfully"})
+    res.status(200).json({
+        ok:true,
+        sucess:true,
+        message: "Product deleted successfully"})
 
 }catch(error){
     res.status(500).json({message: "Internal server error!"})
